@@ -1,0 +1,12 @@
+# Environment variables such as Oracale password
+.env
+
+# DuckDB data
+duckdb-data/
+
+# dbt logistics
+dbt_project/target/
+dbt_project/logs/
+
+# MacOS specifics
+.DS_Store

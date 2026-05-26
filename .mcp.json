@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "oracle": {
+      "command": "docker",
+      "args": ["exec", "-i", "oracle-mcp-server", "python", "main.py"]
+    }
+  }
+}

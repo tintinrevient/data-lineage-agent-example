@@ -1,0 +1,29 @@
+version: 2
+
+models:
+  - name: mart_order_summary
+    description: >
+      Order-level summary replacing the V_ORDER_SUMMARY Oracle view.
+      Joins orders, customers, and aggregated order items into one wide table.
+    columns:
+      - name: order_id
+        description: Primary key — one row per order
+        tests: [unique, not_null]
+      - name: customer_id
+        tests: [not_null]
+      - name: customer_name
+        description: Full name derived from first_name || ' ' || last_name
+      - name: customer_email
+        tests: [not_null]
+      - name: order_date
+      - name: status
+        tests: [not_null]
+      - name: total_amount
+        description: Total amount from the orders table
+      - name: item_count
+        description: Number of distinct line items on the order
+      - name: total_quantity
+        description: Sum of quantities across all line items
+      - name: items_total_amount
+        description: Sum of (quantity * unit_price) across all line items
+      - name: updated_at

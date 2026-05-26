@@ -1,0 +1,104 @@
+services:
+
+  # ─────────────────────────────────────────────
+  # 1. Oracle Database Free (23ai)
+  # ─────────────────────────────────────────────
+  oracle-db:
+    image: gvenzl/oracle-free:latest
+    container_name: oracle-db
+    environment:
+      ORACLE_USERNAME: ${ORACLE_USERNAME}
+      ORACLE_PASSWORD: ${ORACLE_PASSWORD}
+      ORACLE_CHARACTERSET: AL32UTF8
+      # Read-only mode: "1" = only SELECT allowed (default, safer)
+      # Set to "0" if you need INSERT/UPDATE/DELETE from the AI assistant
+      READ_ONLY_MODE: ${READ_ONLY_MODE:-1}
+    ports:
+      - "1521:1521"
+      - "5500:5500"   # EM Express (optional web UI)
+    volumes:
+      - oracle-data:/opt/oracle/oradata
+      - ./seed:/docker-entrypoint-initdb.d:ro   # seed SQL runs on first boot
+    healthcheck:
+      test: ["CMD-SHELL", "echo 'SELECT 1 FROM dual;' | sqlplus -S ${ORACLE_USERNAME}/${ORACLE_PASSWORD}@//localhost:1521/FREE"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 120s   # Oracle takes time on first start
+
+  # ─────────────────────────────────────────────
+  # 2. Oracle MCP Server
+  # Exposes Oracle schema/PL-SQL tools over MCP
+  # ─────────────────────────────────────────────
+  oracle-mcp:
+    image: dmeppiel/oracle-mcp-server:latest
+    container_name: oracle-mcp
+    depends_on:
+      oracle-db:
+        condition: service_healthy
+    environment:
+      ORACLE_CONNECTION_STRING: "${ORACLE_USERNAME}/${ORACLE_PASSWORD}@oracle-db:1521/FREE"
+      ORACLE_SCHEMA: ${ORACLE_SCHEMA}
+      CACHE_DIR: /app/.cache
+      THICK_MODE: ""          # set to "1" if you need thick mode
+      READ_ONLY_MODE: "1"     # keep at "1" for safety; set "0" to allow writes
+    volumes:
+      - oracle-mcp-cache:/app/.cache
+    # MCP servers communicate over stdio – the container stays running for
+    # your MCP client (Claude Desktop / VS Code) to attach via docker exec or
+    # by pointing the client config at this service's stdio transport.
+    stdin_open: true
+    tty: false
+    restart: unless-stopped
+
+  # ─────────────────────────────────────────────
+  # 3. DuckDB
+  # Target database for dbt models
+  # ─────────────────────────────────────────────
+  duckdb:
+    image: duckdb/duckdb:latest
+    container_name: duckdb
+    volumes:
+      - ./duckdb-data:/data
+      - ./dbt_project:/dbt_project:ro
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+
+  # ─────────────────────────────────────────────
+  # 4. dbt MCP Server
+  # Exposes dbt CLI tools and codegen over MCP
+  # ─────────────────────────────────────────────
+  dbt-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile.dbt-mcp
+    container_name: dbt-mcp
+    depends_on:
+      oracle-db:
+        condition: service_healthy
+      duckdb:
+        condition: service_started
+    environment:
+      # dbt CLI mode (no dbt Platform account needed)
+      DBT_PROJECT_DIR: /dbt_project
+      DBT_PROFILES_DIR: /dbt_project/profiles
+      # Oracle connection credentials (for source)
+      ORACLE_USERNAME: ${ORACLE_USERNAME}
+      ORACLE_PASSWORD: ${ORACLE_PASSWORD}
+      ORACLE_SCHEMA: ${ORACLE_SCHEMA}
+      # DuckDB path (for target)
+      DUCKDB_PATH: /data/oracle_lineage.duckdb
+      # Disable cloud / Semantic Layer features for local-only use
+      DISABLE_DBT_PLATFORM: "true"
+      DISABLE_SEMANTIC_LAYER: "true"
+    volumes:
+      - ./dbt_project:/dbt_project
+      - ./duckdb-data:/data
+    stdin_open: true
+    tty: false
+    restart: unless-stopped
+
+volumes:
+  oracle-data:
+  oracle-mcp-cache:

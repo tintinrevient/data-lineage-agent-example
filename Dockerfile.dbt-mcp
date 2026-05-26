@@ -1,0 +1,57 @@
+# Build stage - install dependencies
+FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim AS builder
+
+ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
+
+WORKDIR /app
+
+# Install git for fetching dbt-mcp
+RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
+
+# Install dbt-mcp from GitHub with DuckDB adapter only
+# Also install pandas and oracledb for data loading scripts
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv pip install --system \
+    "dbt-mcp @ git+https://github.com/dbt-labs/dbt-mcp.git" \
+    dbt-core \
+    dbt-duckdb \
+    pandas \
+    oracledb
+
+# Runtime stage
+FROM python:3.12-slim-bookworm
+
+# Install Oracle Instant Client dependencies
+RUN apt-get update && apt-get install -y \
+    wget \
+    unzip \
+    libaio1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Oracle Instant Client (required for thick mode)
+RUN mkdir -p /opt/oracle && \
+    cd /opt/oracle && \
+    wget https://download.oracle.com/otn_software/linux/instantclient/2340000/instantclient-basic-linux.x64-23.4.0.24.05.zip && \
+    unzip instantclient-basic-linux.x64-23.4.0.24.05.zip && \
+    rm instantclient-basic-linux.x64-23.4.0.24.05.zip && \
+    echo /opt/oracle/instantclient_23_4 > /etc/ld.so.conf.d/oracle-instantclient.conf && \
+    ldconfig
+
+ENV LD_LIBRARY_PATH=/opt/oracle/instantclient_23_4:$LD_LIBRARY_PATH
+
+# Create non-root user
+RUN useradd -m -u 1000 appuser
+
+WORKDIR /app
+
+# Copy installed packages from builder
+COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
+
+# Set environment
+ENV PYTHONUNBUFFERED=1
+ENV MCP_TRANSPORT=stdio
+
+USER appuser
+
+ENTRYPOINT ["dbt-mcp"]

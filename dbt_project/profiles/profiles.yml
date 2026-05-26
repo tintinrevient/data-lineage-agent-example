@@ -1,0 +1,9 @@
+oracle_lineage:
+  target: duckdb
+  outputs:
+    # DuckDB target (for running dbt models)
+    duckdb:
+      type: duckdb
+      path: "{{ env_var('DUCKDB_PATH', '/data/oracle_lineage.duckdb') }}"
+      schema: main
+      threads: 4

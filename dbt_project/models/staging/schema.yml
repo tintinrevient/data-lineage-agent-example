@@ -1,0 +1,111 @@
+version: 2
+
+sources:
+  - name: testuser
+    schema: testuser
+    description: Raw Oracle tables loaded into DuckDB from TESTUSER schema
+    tables:
+      - name: orders
+        description: Order header records
+        columns:
+          - name: order_id
+            description: Primary key
+            tests:
+              - unique
+              - not_null
+          - name: customer_id
+            description: Foreign key to customers
+            tests:
+              - not_null
+              - relationships:
+                  arguments:
+                    to: source('testuser', 'customers')
+                    field: customer_id
+          - name: order_date
+            description: Timestamp when the order was placed
+          - name: status
+            description: Current order status
+          - name: total_amount
+            description: Total monetary value of the order
+          - name: updated_at
+            description: Last updated timestamp
+
+      - name: customers
+        description: Customer master records
+        columns:
+          - name: customer_id
+            description: Primary key
+            tests:
+              - unique
+              - not_null
+          - name: first_name
+            tests:
+              - not_null
+          - name: last_name
+            tests:
+              - not_null
+          - name: email
+            tests:
+              - unique
+              - not_null
+          - name: phone
+          - name: created_at
+          - name: updated_at
+
+      - name: order_items
+        description: Line items belonging to each order
+        columns:
+          - name: order_item_id
+            description: Primary key
+            tests:
+              - unique
+              - not_null
+          - name: order_id
+            description: Foreign key to orders
+            tests:
+              - not_null
+              - relationships:
+                  arguments:
+                    to: source('testuser', 'orders')
+                    field: order_id
+          - name: product_id
+            description: Foreign key to products
+            tests:
+              - not_null
+          - name: quantity
+            tests:
+              - not_null
+          - name: unit_price
+            tests:
+              - not_null
+
+models:
+  - name: stg_orders
+    description: Staged orders from the TESTUSER.ORDERS source table
+    columns:
+      - name: order_id
+        tests: [unique, not_null]
+      - name: customer_id
+        tests: [not_null]
+      - name: status
+        tests: [not_null]
+
+  - name: stg_customers
+    description: Staged customers from the TESTUSER.CUSTOMERS source table
+    columns:
+      - name: customer_id
+        tests: [unique, not_null]
+      - name: email
+        tests: [unique, not_null]
+      - name: customer_name
+        tests: [not_null]
+
+  - name: stg_order_items
+    description: Staged order line items from the TESTUSER.ORDER_ITEMS source table
+    columns:
+      - name: order_item_id
+        tests: [unique, not_null]
+      - name: order_id
+        tests: [not_null]
+      - name: line_total
+        description: quantity * unit_price computed at staging
