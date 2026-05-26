@@ -507,7 +507,7 @@ docker exec dbt-mcp bash -c "cd /dbt_project && dbt ls --select +mart_order_summ
 docker exec dbt-mcp bash -c "cd /dbt_project && dbt ls --select +mart_order_summary --resource-type source"
 ```
 
-> ![TIP]
+> [!TIP]
 > | Selector | Description |
 > |----------|-------------|
 > | `model_name` | Select only the specified model |
