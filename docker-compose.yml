@@ -92,6 +92,8 @@ services:
       # Disable cloud / Semantic Layer features for local-only use
       DISABLE_DBT_PLATFORM: "true"
       DISABLE_SEMANTIC_LAYER: "true"
+    ports:
+      - "8080:8080"   # dbt docs serve
     volumes:
       - ./dbt_project:/dbt_project
       - ./duckdb-data:/data

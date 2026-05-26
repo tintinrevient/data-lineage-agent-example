@@ -24,6 +24,7 @@
     - [Claude Desktop (macOS)](#claude-desktop-macos)
     - [VS Code (Claude Code extension)](#vs-code-claude-code-extension)
   - [Using the MCP servers](#using-the-mcp-servers)
+  - [Visualizing data lineage in dbt](#visualizing-data-lineage-in-dbt)
   - [References](#references)
 
 ## Getting started
@@ -476,6 +477,53 @@ Once both MCP servers are connected to your AI assistant:
 6. **Switch targets if needed**
    To run against Oracle source (for comparison):
    > "Run dbt with --target oracle_source"
+
+## Visualizing data lineage in dbt
+
+1. Generate the docs:
+
+```shell
+docker exec -it dbt-mcp dbt docs generate
+```
+
+2. Serve the docs:
+
+```shell
+docker exec -it dbt-mcp dbt docs serve --host 0.0.0.0 --port 8080
+```
+
+3. Select and show a specific table's upstream or downstream dependencies:
+
+```shell
+docker exec dbt-mcp bash -c "cd /dbt_project && dbt ls --resource-type model"
+
+# +model_name - Shows the model AND all its upstream ancestors
+docker exec dbt-mcp bash -c "cd /dbt_project && dbt ls --select +mart_order_summary"
+
+# +model_name --resource-type model - Shows ONLY upstream models (excludes sources and tests)
+docker exec dbt-mcp bash -c "cd /dbt_project && dbt ls --select +mart_order_summary --resource-type model"
+
+# +model_name --resource-type source - Shows ONLY upstream sources
+docker exec dbt-mcp bash -c "cd /dbt_project && dbt ls --select +mart_order_summary --resource-type source"
+```
+
+> ![TIP]
+> | Selector | Description |
+> |----------|-------------|
+> | `model_name` | Select only the specified model |
+> | `+model_name` | Model + all upstream ancestors (models, sources, tests) |
+> | `1+model_name` | Model + 1 level upstream |
+> | `2+model_name` | Model + 2 levels upstream |
+> | `model_name+` | Model + all downstream descendants |
+> | `model_name+1` | Model + 1 level downstream |
+> | `model_name+2` | Model + 2 levels downstream |
+> | `+model_name+` | Model + all upstream AND downstream |
+> | `1+model_name+1` | Model + 1 level upstream + 1 level downstream |
+> | `tag:my_tag` | All models with the specified tag |
+> | `path:models/staging` | All models in the specified path |
+> | `model_a model_b` | Union: select model_a OR model_b |
+> | `model_a,model_b` | Intersection: select model_a AND model_b |
+> | `@model_name` | Model + all direct parents and children |
 
 ## References
 
