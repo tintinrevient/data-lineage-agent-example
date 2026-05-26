@@ -41,11 +41,17 @@ vim .env
 For the dummy database example, you can directly use below `.env`:
 
 ```shell
-# Oracle database password (only used by example with username: `system`)
+# Oracle database username
+ORACLE_USERNAME=testuser
+
+# Oracle database password
 ORACLE_PASSWORD=TestPassword123
 
-# Target schema for Oracle MCP
-TARGET_SCHEMA=TESTUSER
+# Oracle schema
+ORACLE_SCHEMA=TESTUSER
+
+# Read-only mode: 1 = SELECT only (default); 0 = allow writes
+READ_ONLY_MODE=1
 ```
 
 2. With [Docker Desktop](https://www.docker.com/products/docker-desktop/) running, execute the following command to spin up the agent environment:
