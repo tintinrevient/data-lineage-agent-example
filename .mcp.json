@@ -2,7 +2,11 @@
   "mcpServers": {
     "oracle": {
       "command": "docker",
-      "args": ["exec", "-i", "oracle-mcp-server", "python", "main.py"]
+      "args": ["exec", "-i", "oracle-mcp", "python", "main.py"]
+    },
+    "dbt": {
+      "command": "docker",
+      "args": ["exec", "-i", "dbt-mcp", "dbt-mcp"]
     }
   }
 }

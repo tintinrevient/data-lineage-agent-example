@@ -336,7 +336,13 @@ SHOW TABLES;
 docker exec dbt-mcp python3 /dbt_project/load_oracle_to_duckdb.py
 ```
 
-2. You can materialize a selected view via `dbt run --select` one by one:
+2. After you've created the source tables, you can show them under the schema `testuser`:
+
+```shell
+docker exec -it duckdb duckdb /data/oracle_lineage.duckdb -c "SHOW TABLES FROM 'testuser'"
+```
+
+3. You can materialize a selected view via `dbt run --select` one by one:
 
 ```shell
 # Run staging model for customers
@@ -358,7 +364,7 @@ Or you can do it in one go:
 docker exec -it dbt-mcp dbt run
 ```
 
-3. Finally, you can play around with all the tables in DuckDB by connecting to it:
+4. Finally, you can play around with all the tables in DuckDB by connecting to it:
 
 ```shell
 docker exec -it duckdb duckdb /data/oracle_lineage.duckdb

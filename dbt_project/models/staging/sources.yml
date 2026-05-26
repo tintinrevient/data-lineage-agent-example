@@ -1,0 +1,51 @@
+version: 2
+
+sources:
+  - name: testuser
+    description: Data loaded from Oracle into DuckDB via load_oracle_to_duckdb.py
+    database: oracle_lineage
+    schema: testuser
+    tables:
+      - name: customers
+        description: Customer dimension table
+        columns:
+          - name: customer_id
+            description: Unique identifier for customers
+          - name: email
+            description: Customer email address
+          - name: first_name
+            description: Customer first name
+          - name: last_name
+            description: Customer last name
+
+      - name: products
+        description: Product dimension table
+        columns:
+          - name: product_id
+            description: Unique identifier for products
+
+      - name: orders
+        description: Orders fact table
+        columns:
+          - name: order_id
+            description: Unique identifier for orders
+          - name: customer_id
+            description: Foreign key to customers
+          - name: order_date
+            description: Date the order was placed
+          - name: status
+            description: Current order status
+
+      - name: order_items
+        description: Order line items fact table
+        columns:
+          - name: order_item_id
+            description: Unique identifier for order items
+          - name: order_id
+            description: Foreign key to orders
+          - name: product_id
+            description: Foreign key to products
+          - name: quantity
+            description: Quantity ordered
+          - name: unit_price
+            description: Price per unit
