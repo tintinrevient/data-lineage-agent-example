@@ -483,31 +483,40 @@ Once both MCP servers are connected to your AI assistant:
 1. Generate the docs:
 
 ```shell
+# Option 1: Use `dbt`.
 docker exec -it dbt-mcp dbt docs generate
+
+# Option 2: Use `docglow`, which can show column lineage, ERD, compiled SQL and supports profiling.
+docker exec -it dbt-mcp docglow generate --project-dir ../dbt_project --output-dir ./demo-site
 ```
 
 2. Serve the docs:
 
 ```shell
+# Option 1: Use `dbt` to serve the site.
 docker exec -it dbt-mcp dbt docs serve --host 0.0.0.0 --port 8080
+
+# Option 2: Use `docglow to serve the site.
+docker exec -it dbt-mcp docglow serve --dir ./demo-site --host 0.0.0.0 --port 8080
 ```
-
-3. Select and show a specific table's upstream or downstream dependencies:
-
-```shell
-docker exec dbt-mcp bash -c "cd /dbt_project && dbt ls --resource-type model"
-
-# +model_name - Shows the model AND all its upstream ancestors
-docker exec dbt-mcp bash -c "cd /dbt_project && dbt ls --select +mart_order_summary"
-
-# +model_name --resource-type model - Shows ONLY upstream models (excludes sources and tests)
-docker exec dbt-mcp bash -c "cd /dbt_project && dbt ls --select +mart_order_summary --resource-type model"
-
-# +model_name --resource-type source - Shows ONLY upstream sources
-docker exec dbt-mcp bash -c "cd /dbt_project && dbt ls --select +mart_order_summary --resource-type source"
-```
+![](./pix/docglow-lineage.png)
 
 > [!TIP]
+> Select and show a specific table's upstream or downstream dependencies:
+> 
+> ```shell
+> docker exec dbt-mcp bash -c "cd /dbt_project && dbt ls --resource-type model"
+> 
+> # +model_name - Shows the model AND all its upstream ancestors
+> docker exec dbt-mcp bash -c "cd /dbt_project && dbt ls --select +mart_order_summary"
+> 
+> # +model_name --resource-type model - Shows ONLY upstream models (excludes sources and tests)
+> docker exec dbt-mcp bash -c "cd /dbt_project && dbt ls --select +mart_order_summary --resource-type model"
+> 
+> # +model_name --resource-type source - Shows ONLY upstream sources
+> docker exec dbt-mcp bash -c "cd /dbt_project && dbt ls --select +mart_order_summary --resource-type source"
+> ```
+> 
 > | Selector | Description |
 > |----------|-------------|
 > | `model_name` | Select only the specified model |

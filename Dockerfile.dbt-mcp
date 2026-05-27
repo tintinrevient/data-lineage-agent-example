@@ -16,7 +16,8 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     dbt-core \
     dbt-duckdb \
     pandas \
-    oracledb
+    oracledb \
+    docglow
 
 # Runtime stage
 FROM python:3.12-slim-bookworm
@@ -37,12 +38,18 @@ RUN mkdir -p /opt/oracle && \
     echo /opt/oracle/instantclient_23_4 > /etc/ld.so.conf.d/oracle-instantclient.conf && \
     ldconfig
 
+# Make directory to host docglow static site to show column-level lineage
+RUN mkdir -p /app/demo-site
+
 ENV LD_LIBRARY_PATH=/opt/oracle/instantclient_23_4:$LD_LIBRARY_PATH
 
 # Create non-root user
 RUN useradd -m -u 1000 appuser
 
 WORKDIR /app
+
+# Change ownership of demo-site to appuser
+RUN chown -R appuser:appuser /app/demo-site
 
 # Copy installed packages from builder
 COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages

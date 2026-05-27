@@ -93,7 +93,7 @@ services:
       DISABLE_DBT_PLATFORM: "true"
       DISABLE_SEMANTIC_LAYER: "true"
     ports:
-      - "8080:8080"   # dbt docs serve
+      - "8080:8080"   # "dbt docs serve" or "docglow serve --dir ./demo-site"
     volumes:
       - ./dbt_project:/dbt_project
       - ./duckdb-data:/data
