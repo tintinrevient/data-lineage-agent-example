@@ -542,3 +542,4 @@ docker exec -it dbt-mcp docglow serve --dir ./demo-site --host 0.0.0.0 --port 80
 * https://github.com/googleapis/mcp-toolbox
 * https://github.com/oracle/mcp
 * https://github.com/dbt-labs/dbt-mcp
+* https://github.com/docglow/docglow
