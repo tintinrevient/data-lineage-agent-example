@@ -516,6 +516,8 @@ docker exec -it dbt-mcp docglow serve --dir ./demo-site --host 0.0.0.0 --port 80
 > # +model_name --resource-type source - Shows ONLY upstream sources
 > docker exec dbt-mcp bash -c "cd /dbt_project && dbt ls --select +mart_order_summary --resource-type source"
 > ```
+>
+> The detailed selector list is as below:
 > 
 > | Selector | Description |
 > |----------|-------------|
