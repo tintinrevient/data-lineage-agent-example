@@ -483,10 +483,10 @@ Once both MCP servers are connected to your AI assistant:
 1. Generate the docs:
 
 ```shell
-# Option 1: Use `dbt`.
-docker exec -it dbt-mcp dbt docs generate
+# First, build catalog to /dbt_project/target/catalog.json
+docker exec -it dbt-mcp dbt docs generate        
 
-# Option 2: Use `docglow`, which can show column lineage, ERD, compiled SQL and supports profiling.
+# Second, use docglow to generate demo-site
 docker exec -it dbt-mcp docglow generate --project-dir ../dbt_project --output-dir ./demo-site
 ```
 
