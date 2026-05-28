@@ -3,7 +3,7 @@
 > [!IMPORTANT]
 > The infrastructure of the local dev environment includes the Oracle database and DuckDB to mimic the goal to `extract the transformation logic from one database and write them down in dbt for future migration` as an example.
 >
-> In production, you don't need these databases. You only need MCP servers.
+> In production, you don't need these databases. You only need MCP servers with dbt-core to persist only the transformation logic.
 
 ## Table of contents
 
