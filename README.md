@@ -474,10 +474,6 @@ Once both MCP servers are connected to your AI assistant:
    SELECT * FROM main.stg_customers;
    ```
 
-6. **Switch targets if needed**
-   To run against Oracle source (for comparison):
-   > "Run dbt with --target oracle_source"
-
 ## Visualizing data lineage in dbt
 
 1. Generate the docs:
